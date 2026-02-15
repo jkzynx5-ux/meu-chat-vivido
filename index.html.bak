@@ -74,70 +74,20 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-    // Garantir que o código só rode quando a página carregar toda
-    window.onload = () => {
         const socket = io();
         let avatarSelecionado = "Felix";
 
-        console.log("Chat pronto para rodar!");
-
-        // Lógica de seleção de avatar (Corrigida)
-        const opcoes = document.querySelectorAll('.avatar-option');
-        opcoes.forEach(img => {
-            img.onclick = function() {
-                // Remove a borda azul de todos
-                opcoes.forEach(i => i.classList.remove('selected'));
-                // Coloca a borda azul no que foi clicado
-                this.classList.add('selected');
-                // Salva o nome do avatar
-                avatarSelecionado = this.getAttribute('data-avatar');
-                console.log("Avatar escolhido:", avatarSelecionado);
-            };
+        // Seleção de Avatar
+        document.querySelectorAll('.avatar-option').forEach(img => {
+            img.addEventListener('click', () => {
+                document.querySelector('.selected').classList.remove('selected');
+                img.classList.add('selected');
+                avatarSelecionado = img.getAttribute('data-avatar');
+            });
         });
 
-        // Função entrar (agora como variável global para o botão achar)
-        window.entrar = function() {
-            const nomeInput = document.getElementById('username');
-            const nome = nomeInput.value.trim();
-            
-            if (nome !== "") {
-                console.log("Entrando como:", nome);
-                socket.emit('novo-usuario', { nome: nome, avatar: avatarSelecionado });
-                
+        function entrar() {
+            const nome = document.getElementById('username').value;
+            if(nome.trim()) {
+                socket.emit('novo-usuario', { nome, avatar: avatarSelecionado });
                 document.getElementById('login-container').style.display = 'none';
-                document.getElementById('chat-container').style.display = 'flex';
-            } else {
-                alert("Por favor, digite um apelido!");
-                nomeInput.focus();
-            }
-        };
-
-        // Lógica das mensagens
-        const form = document.getElementById('form');
-        const input = document.getElementById('input');
-        const messages = document.getElementById('messages');
-
-        form.onsubmit = (e) => {
-            e.preventDefault();
-            if (input.value.trim()) {
-                socket.emit('chat message', input.value);
-                input.value = '';
-            }
-        };
-
-        socket.on('chat message', (data) => {
-            const item = document.createElement('div');
-            item.innerHTML = `
-                <div class="msg-wrapper">
-                    <img class="msg-avatar" src="${data.avatar}">
-                    <div class="msg-content">
-                        <div class="msg-author">${data.usuario}</div>
-                        <div>${data.texto}</div>
-                    </div>
-                </div>
-            `;
-            messages.appendChild(item);
-            messages.scrollTop = messages.scrollHeight;
-        });
-    };
-</script>
