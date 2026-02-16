@@ -15,16 +15,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--gradient-bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* TELA DE REGISTRO ESTILO WHATSAPP */
-        #login-container { position: fixed; inset: 0; background: #fff; display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .login-box { width: 100%; max-width: 350px; text-align: center; }
-        .profile-pic-container { position: relative; width: 110px; height: 110px; margin: 0 auto 20px; }
-        #preview-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); background: #eee; }
-        .upload-btn { position: absolute; bottom: 0; right: 0; background: var(--accent); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid white; font-size: 14px; }
-        
-        .login-box input { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 12px; border: 1px solid #ddd; background: #f9f9f9; outline: none; }
-        .login-box button { width: 100%; padding: 14px; border-radius: 12px; background: #333; color: white; border: none; font-weight: bold; cursor: pointer; }
-
         /* HEADER */
         .chat-header { background: white; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 10; }
         .header-info { display: flex; align-items: center; gap: 12px; }
@@ -34,23 +24,34 @@
         /* MENSAGENS */
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
         .msg-wrapper { display: flex; align-items: flex-start; gap: 8px; max-width: 85%; }
-        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 15px; }
+        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 5px; }
         
         .minha-msg { align-self: flex-end; flex-direction: row-reverse; }
-        .minha-msg .msg-content { background: var(--gradient-me); color: white; border-radius: 18px 18px 0 18px; padding: 10px 15px; box-shadow: 0 4px 12px rgba(66, 230, 149, 0.2); }
+        .minha-msg .msg-content { background: var(--gradient-me); color: white; border-radius: 18px 18px 0 18px; padding: 10px 15px; }
         .minha-msg .msg-avatar { display: none; }
 
         .outra-msg { align-self: flex-start; }
-        .outra-msg .msg-content { background: var(--glass-bg); color: #333; border-radius: 18px 18px 18px 0; padding: 10px 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .outra-msg .msg-content { background: var(--glass-bg); color: #333; border-radius: 18px 18px 18px 0; padding: 10px 15px; }
 
-        .msg-info { font-size: 0.7rem; margin-bottom: 2px; color: #666; font-weight: bold; }
+        .msg-content img { max-width: 100%; border-radius: 10px; margin-top: 5px; display: block; }
+        audio { max-width: 200px; margin-top: 5px; }
         .msg-time { font-size: 0.6rem; margin-top: 4px; display: block; text-align: right; opacity: 0.7; }
 
         /* FOOTER */
         #footer { padding: 15px 20px; }
-        #form { background: #333; border-radius: 30px; padding: 6px 10px 6px 20px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        #input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 0.95rem; }
-        .send-btn { background: var(--accent); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; cursor: pointer; font-size: 1.1rem; }
+        #form { background: #333; border-radius: 30px; padding: 6px 15px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        #input { flex: 1; background: transparent; border: none; color: white; outline: none; padding: 10px 0; }
+        .icon-btn { color: #bbb; font-size: 1.2rem; cursor: pointer; transition: 0.2s; }
+        .icon-btn:hover { color: white; }
+        .send-btn { background: var(--accent); border: none; width: 38px; height: 38px; border-radius: 50%; color: white; cursor: pointer; }
+        .recording { color: #ff4444 !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* LOGIN (Oculto no começo) */
+        #login-container { position: fixed; inset: 0; background: #fff; display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .login-box { width: 100%; max-width: 350px; text-align: center; }
+        .login-box input { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 12px; border: 1px solid #ddd; outline: none; }
+        .login-box button { width: 100%; padding: 14px; border-radius: 12px; background: #333; color: white; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -59,43 +60,43 @@
 
     <div id="login-container">
         <div class="login-box">
-            <h2 style="margin-bottom: 5px;">Criar Perfil</h2>
-            <p style="color:#888; font-size:0.85rem; margin-bottom:20px;">Escolha uma foto da sua galeria</p>
-            
-            <div class="profile-pic-container">
-                <img id="preview-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=custom">
-                <label for="file-input" class="upload-btn">📷</label>
-                <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="carregarFoto(event)">
+            <h2 style="margin-bottom: 20px;">Configurar Perfil</h2>
+            <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 20px;">
+                <img id="preview-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=custom" style="width:100%; height:100%; border-radius:50%; border:3px solid var(--accent); object-fit: cover;">
+                <label for="reg-photo" style="position:absolute; bottom:0; right:0; background:var(--accent); width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:white; border:2px solid white;">📷</label>
+                <input type="file" id="reg-photo" accept="image/*" style="display:none" onchange="processarFoto(event, 'perfil')">
             </div>
-
             <input type="text" id="nome" placeholder="Seu Nome">
-            <input type="email" id="email" placeholder="E-mail">
-            <input type="text" id="user" placeholder="Nome de usuário único">
+            <input type="text" id="user" placeholder="Nome de usuário">
             <input type="password" id="pass" placeholder="Senha">
-            <button onclick="registrar()">Começar Agora</button>
+            <button onclick="registrar()">Entrar</button>
         </div>
     </div>
 
     <div class="chat-header" id="header" style="display:none;">
         <div class="header-info">
-            <div style="font-weight: bold; color: #333; font-size: 1.1rem;">⚡ Vivido</div>
+            <div style="font-weight: bold; color: #333;">⚡ Vivido Pro</div>
             <div>
                 <select id="room-selector" onchange="mudarSala()">
                     <option value="Geral">🌍 Geral</option>
                     <option value="Games">🎮 Games</option>
-                    <option value="Privado">🔒 Privado</option>
                 </select>
                 <p id="typing-monitor"></p>
             </div>
         </div>
-        <button onclick="sair()" style="background:none; border:none; color:#999; font-size:0.9rem;">Sair</button>
+        <button onclick="sair()" style="background:none; border:none; color:#999; cursor:pointer;">Sair</button>
     </div>
 
     <div id="messages"></div>
 
     <div id="footer" style="display:none;">
         <form id="form">
+            <label for="chat-photo" class="icon-btn">📎</label>
+            <input type="file" id="chat-photo" accept="image/*" style="display:none" onchange="processarFoto(event, 'chat')">
+            
             <input id="input" autocomplete="off" placeholder="Digite uma mensagem..." />
+            
+            <span id="mic-btn" class="icon-btn" onclick="toggleAudio()">🎤</span>
             <button type="submit" class="send-btn">➤</button>
         </form>
     </div>
@@ -104,34 +105,17 @@
     <script>
         const socket = io();
         let meuUser = null;
-        let typingTimeout;
-        let fotoBase64 = "https://api.dicebear.com/7.x/avataaars/svg?seed=custom";
-
-        function carregarFoto(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function() {
-                const img = new Image();
-                img.src = reader.result;
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const max = 150; 
-                    const scale = max / Math.max(img.width, img.height);
-                    canvas.width = img.width * scale;
-                    canvas.height = img.height * scale;
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    fotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                    document.getElementById('preview-avatar').src = fotoBase64;
-                }
-            }
-            if(file) reader.readAsDataURL(file);
-        }
+        let fotoPerfil = "https://api.dicebear.com/7.x/avataaars/svg?seed=custom";
+        
+        // Audio Recording Vars
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
 
         window.onload = () => {
             const salvo = localStorage.getItem('vivido_login');
             if (salvo) {
                 meuUser = JSON.parse(salvo);
-                document.getElementById('login-container').style.display = 'none';
                 document.getElementById('header').style.display = 'flex';
                 document.getElementById('footer').style.display = 'block';
                 mudarSala(); 
@@ -140,77 +124,88 @@
             }
         };
 
-        function mudarSala() {
-            const sala = document.getElementById('room-selector').value;
-            document.getElementById('messages').innerHTML = ''; 
-            socket.emit('join-room', { sala, user: meuUser });
+        function processarFoto(event, tipo) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function() {
+                const img = new Image();
+                img.src = reader.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const max = 400; 
+                    const scale = max / Math.max(img.width, img.height);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    if(tipo === 'perfil') {
+                        fotoPerfil = base64;
+                        document.getElementById('preview-avatar').src = base64;
+                    } else {
+                        socket.emit('chat message', { imagem: base64 });
+                    }
+                }
+            }
+            if(file) reader.readAsDataURL(file);
         }
 
-        async function registrar() {
-            const user = {
-                nome: document.getElementById('nome').value,
-                email: document.getElementById('email').value,
-                username: document.getElementById('user').value,
-                pass: document.getElementById('pass').value,
-                avatar: fotoBase64
-            };
-            if(!user.username || !user.nome) return alert("Preencha os campos!");
-            
-            const res = await fetch('/registrar', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(user)
-            });
-
-            if (res.ok) {
-                localStorage.setItem('vivido_login', JSON.stringify(user));
-                location.reload();
-            } else { alert("Usuário já existe."); }
+        async function toggleAudio() {
+            const btn = document.getElementById('mic-btn');
+            if (!isRecording) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => socket.emit('chat message', { audio: reader.result });
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                btn.classList.add('recording');
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                btn.classList.remove('recording');
+            }
         }
-
-        function sair() { localStorage.removeItem('vivido_login'); location.reload(); }
-
-        document.getElementById('input').addEventListener('input', () => {
-            socket.emit('typing', true);
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => socket.emit('typing', false), 2000);
-        });
-
-        socket.on('user-typing', (data) => {
-            document.getElementById('typing-monitor').innerText = data.typing ? `${data.username} está digitando...` : '';
-        });
 
         function renderMsg(data) {
             const eMinha = data.usuarioLogado === meuUser.username;
             const item = document.createElement('div');
             item.className = `msg-wrapper ${eMinha ? 'minha-msg' : 'outra-msg'}`;
             
+            let conteudo = '';
+            if(data.texto) conteudo = `<div>${data.texto}</div>`;
+            if(data.imagem) conteudo = `<img src="${data.imagem}">`;
+            if(data.audio) conteudo = `<audio controls src="${data.audio}"></audio>`;
+
             item.innerHTML = `
                 <img class="msg-avatar" src="${data.avatar}">
                 <div class="msg-content">
                     ${!eMinha ? `<span class="msg-info">${data.exibirNome}</span>` : ''}
-                    <div style="word-break: break-word;">${data.texto}</div>
-                    <span class="msg-time">${data.hora} ${eMinha ? '✓' : ''}</span>
+                    ${conteudo}
+                    <span class="msg-time">${data.hora}</span>
                 </div>
             `;
-            
-            const box = document.getElementById('messages');
-            box.appendChild(item);
-            box.scrollTop = box.scrollHeight;
-            if (!eMinha) document.getElementById('som-notificacao').play().catch(() => {});
+            document.getElementById('messages').appendChild(item);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
         }
 
-        document.getElementById('form').onsubmit = (e) => {
-            e.preventDefault();
-            const input = document.getElementById('input');
-            if (input.value.trim()) { 
-                socket.emit('chat message', input.value); 
-                input.value = ''; 
-            }
-        };
-
-        socket.on('chat message', (data) => renderMsg(data));
-        socket.on('historico', (lista) => lista.forEach(msg => renderMsg(msg)));
+        // Funções Básicas
+        async function registrar() {
+            const user = { nome: document.getElementById('nome').value, username: document.getElementById('user').value, pass: document.getElementById('pass').value, avatar: fotoPerfil };
+            const res = await fetch('/registrar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(user) });
+            if (res.ok) { localStorage.setItem('vivido_login', JSON.stringify(user)); location.reload(); }
+        }
+        function mudarSala() { socket.emit('join-room', { sala: document.getElementById('room-selector').value, user: meuUser }); document.getElementById('messages').innerHTML = ''; }
+        function sair() { localStorage.removeItem('vivido_login'); location.reload(); }
+        document.getElementById('form').onsubmit = (e) => { e.preventDefault(); const val = document.getElementById('input').value; if(val) { socket.emit('chat message', { texto: val }); document.getElementById('input').value = ''; } };
+        socket.on('chat message', data => renderMsg(data));
+        socket.on('historico', lista => lista.forEach(m => renderMsg(m)));
     </script>
 </body>
 </html>
