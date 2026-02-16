@@ -30,16 +30,20 @@ io.on('connection', (socket) => {
 
     socket.on('entrar-chat', (user) => {
         socket.nomeReal = user.nome;
-        socket.userNameUnico = user.username; // Usaremos isso para identificar a conta
+        socket.userNameUnico = user.username;
         socket.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`;
     });
 
     socket.on('chat message', (msg) => {
+        const agora = new Date();
+        const horaFormatada = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
+
         const objetoMsg = {
-            usuarioLogado: socket.userNameUnico, // Identificador fixo da conta
+            usuarioLogado: socket.userNameUnico,
             exibirNome: socket.nomeReal,
             texto: msg,
-            avatar: socket.avatar
+            avatar: socket.avatar,
+            hora: horaFormatada
         };
         
         let msgs = JSON.parse(fs.readFileSync(MSGS_FILE, 'utf8'));
@@ -50,4 +54,5 @@ io.on('connection', (socket) => {
     });
 });
 
-http.listen(process.env.PORT || 3000, () => console.log('Servidor ON'));
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => console.log('Servidor ON na porta ' + PORT));
