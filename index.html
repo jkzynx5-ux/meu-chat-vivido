@@ -8,23 +8,22 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #0b141a; color: white; }
 
-        /* TELAS */
         #login-container { position: fixed; inset: 0; background: #121212; display: none; align-items: center; justify-content: center; z-index: 1000; }
-        #chat-container { display: none; height: 100vh; flex-direction: column; background: #0b141a; }
+        #chat-container { display: none; height: 100vh; flex-direction: column; }
 
         .login-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 90%; max-width: 350px; text-align: center; }
         input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: none; background: #333; color: white; }
         button { width: 100%; padding: 12px; background: #00a884; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        .avatar-list { display: flex; justify-content: center; gap: 8px; margin: 15px 0; }
-        .avatar-option { width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
-        .avatar-option.selected { border-color: #00a884; }
+        /* HEADER DO CHAT */
+        .chat-header { background: #202c33; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-sair { background: #ff4444; padding: 5px 15px; font-size: 0.8em; width: auto; }
 
-        /* CHAT */
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
+        /* MENSAGENS */
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; background: #0b141a; }
         .msg-wrapper { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; width: 100%; }
         .msg-content { padding: 8px 12px; border-radius: 10px; max-width: 75%; }
-        .msg-avatar { width: 30px; height: 30px; border-radius: 50%; }
+        .msg-avatar { width: 35px; height: 35px; border-radius: 50%; }
 
         .outra-msg { flex-direction: row; }
         .outra-msg .msg-content { background: #202c33; }
@@ -32,7 +31,7 @@
         .minha-msg .msg-content { background: #005c4b; }
 
         #form { display: flex; padding: 10px; background: #202c33; gap: 8px; }
-        #input { flex: 1; border-radius: 20px; padding: 10px 15px; }
+        #input { flex: 1; border-radius: 20px; padding: 10px 15px; border: none; background: #2a3942; color: white; }
     </style>
 </head>
 <body>
@@ -40,46 +39,35 @@
     <div id="login-container">
         <div class="login-box">
             <h3>Criar Conta</h3>
-            <input type="text" id="nome" placeholder="Nome">
-            <input type="email" id="email" placeholder="E-mail">
-            <input type="text" id="user" placeholder="Usuário">
+            <input type="text" id="nome" placeholder="Seu Nome">
+            <input type="text" id="user" placeholder="Nome de Usuário (Único)">
             <input type="password" id="pass" placeholder="Senha">
-            <div class="avatar-list" id="avatares">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="avatar-option selected" data-avatar="Felix">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" class="avatar-option" data-avatar="Aneka">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jack" class="avatar-option" data-avatar="Jack">
-            </div>
-            <button onclick="registrar()">Registrar e Entrar</button>
+            <button onclick="registrar()">Começar a Conversar</button>
         </div>
     </div>
 
     <div id="chat-container">
+        <div class="chat-header">
+            <span>Chat Vivido</span>
+            <button class="btn-sair" onclick="sair()">Sair</button>
+        </div>
         <div id="messages"></div>
         <form id="form">
             <input id="input" autocomplete="off" placeholder="Mensagem" />
-            <button type="submit" style="width: auto; padding: 0 15px;">></button>
+            <button type="submit" style="width: auto; padding: 0 20px;">></button>
         </form>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let avatarSel = "Felix";
+        let meuUsuarioLogado = "";
 
-        // Gerenciar Avatares
-        document.querySelectorAll('.avatar-option').forEach(img => {
-            img.onclick = function() {
-                document.querySelector('.selected').classList.remove('selected');
-                this.classList.add('selected');
-                avatarSel = this.getAttribute('data-avatar');
-            }
-        });
-
-        // AUTO-LOGIN
         window.onload = () => {
             const salvo = localStorage.getItem('vivido_login');
             if (salvo) {
                 const user = JSON.parse(salvo);
+                meuUsuarioLogado = user.username; // Salva o username para comparar nas msgs
                 socket.emit('entrar-chat', user);
                 document.getElementById('chat-container').style.display = 'flex';
             } else {
@@ -90,10 +78,9 @@
         async function registrar() {
             const user = {
                 nome: document.getElementById('nome').value,
-                email: document.getElementById('email').value,
                 username: document.getElementById('user').value,
                 pass: document.getElementById('pass').value,
-                avatar: avatarSel
+                avatar: "Felix" 
             };
 
             const res = await fetch('/registrar', {
@@ -106,25 +93,36 @@
                 localStorage.setItem('vivido_login', JSON.stringify(user));
                 location.reload();
             } else {
-                alert("Usuário já existe ou erro no servidor.");
+                alert("Este nome de usuário já existe!");
             }
         }
 
-        const form = document.getElementById('form');
-        const input = document.getElementById('input');
-        const messages = document.getElementById('messages');
+        function sair() {
+            localStorage.removeItem('vivido_login');
+            location.reload();
+        }
 
         function renderMsg(data) {
             const item = document.createElement('div');
-            const eMinha = data.id === socket.id;
+            // COMPARAÇÃO FIXA: Se o username da msg for igual ao salvo no meu celular
+            const eMinha = data.usuarioLogado === meuUsuarioLogado;
+            
             item.className = `msg-wrapper ${eMinha ? 'minha-msg' : 'outra-msg'}`;
-            item.innerHTML = `<img class="msg-avatar" src="${data.avatar}"><div class="msg-content"><small>${data.usuario}</small><div>${data.texto}</div></div>`;
+            item.innerHTML = `
+                <img class="msg-avatar" src="${data.avatar}">
+                <div class="msg-content">
+                    <small style="color: #8696a0; font-size: 0.7em;">${data.exibirNome}</small>
+                    <div>${data.texto}</div>
+                </div>
+            `;
+            const messages = document.getElementById('messages');
             messages.appendChild(item);
             messages.scrollTop = messages.scrollHeight;
         }
 
-        form.onsubmit = (e) => {
+        document.getElementById('form').onsubmit = (e) => {
             e.preventDefault();
+            const input = document.getElementById('input');
             if (input.value) { socket.emit('chat message', input.value); input.value = ''; }
         };
 
