@@ -5,51 +5,51 @@ const io = require('socket.io')(http);
 const fs = require('fs');
 const path = require('path');
 
+app.use(express.json());
 app.use(express.static(__dirname));
 
-// Caminho do banco de dados
-const dbPath = path.join(__dirname, 'mensagens.json');
+const USERS_FILE = path.join(__dirname, 'usuarios.json');
+const MSGS_FILE = path.join(__dirname, 'mensagens.json');
 
-// Função para ler mensagens do JSON
-function lerMensagens() {
-    try {
-        if (!fs.existsSync(dbPath)) fs.writeFileSync(dbPath, '[]');
-        const dados = fs.readFileSync(dbPath, 'utf8');
-        return JSON.parse(dados);
-    } catch (err) { 
-        return []; 
+// Garante que os arquivos existam
+if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, '[]');
+if (!fs.existsSync(MSGS_FILE)) fs.writeFileSync(MSGS_FILE, '[]');
+
+// Rota para Registrar Usuário
+app.post('/registrar', (req, res) => {
+    const novoUsuario = req.body;
+    let usuarios = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+    
+    if (usuarios.find(u => u.username === novoUsuario.username)) {
+        return res.status(400).json({ erro: "Usuário já existe!" });
     }
-}
-
-// Função para salvar mensagem no JSON
-function salvarMensagem(novaMsg) {
-    const mensagens = lerMensagens();
-    mensagens.push(novaMsg);
-    if (mensagens.length > 50) mensagens.shift(); // Mantém as últimas 50
-    fs.writeFileSync(dbPath, JSON.stringify(mensagens, null, 2));
-}
-
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    
+    usuarios.push(novoUsuario);
+    fs.writeFileSync(USERS_FILE, JSON.stringify(usuarios, null, 2));
+    res.json({ sucesso: true });
 });
 
 io.on('connection', (socket) => {
-    // Quando o usuário conecta, envia o histórico salvo
-    socket.emit('historico', lerMensagens());
+    // Envia o histórico ao conectar
+    socket.emit('historico', JSON.parse(fs.readFileSync(MSGS_FILE, 'utf8')));
 
-    socket.on('novo-usuario', (dados) => {
-        socket.username = dados.nome || "Anônimo";
-        socket.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${dados.avatar}`;
+    socket.on('entrar-chat', (user) => {
+        socket.username = user.nome;
+        socket.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`;
     });
 
     socket.on('chat message', (msg) => {
         const objetoMsg = {
-            id: socket.id, // ID temporário para saber quem é você
+            id: socket.id,
             texto: msg,
             usuario: socket.username || "Anônimo",
             avatar: socket.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
         };
-        salvarMensagem(objetoMsg);
+        
+        let msgs = JSON.parse(fs.readFileSync(MSGS_FILE, 'utf8'));
+        msgs.push(objetoMsg);
+        fs.writeFileSync(MSGS_FILE, JSON.stringify(msgs.slice(-50), null, 2));
+        
         io.emit('chat message', objetoMsg);
     });
 });

@@ -3,61 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Vivido</title>
+    <title>Chat Vivido Pro</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #0b141a; color: white; }
 
-        /* TELA DE LOGIN */
-        #login-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #121212; display: flex; align-items: center; justify-content: center; z-index: 1000;
-        }
-        .login-box {
-            background: #1e1e1e; padding: 30px; border-radius: 15px; text-align: center; width: 90%; max-width: 400px;
-        }
-        .avatar-list { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        .avatar-option { width: 55px; height: 55px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; }
-        .avatar-option.selected { border-color: #00a884; background: #333; }
-        input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: none; background: #333; color: white; }
-        button { width: 100%; padding: 12px; background: #00a884; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        /* TELAS */
+        #login-container { position: fixed; inset: 0; background: #121212; display: none; align-items: center; justify-content: center; z-index: 1000; }
+        #chat-container { display: none; height: 100vh; flex-direction: column; background: #0b141a; }
 
-        /* ÁREA DO CHAT */
-        #chat-container { display: none; height: 100vh; flex-direction: column; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
-        
+        .login-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 90%; max-width: 350px; text-align: center; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: none; background: #333; color: white; }
+        button { width: 100%; padding: 12px; background: #00a884; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        .avatar-list { display: flex; justify-content: center; gap: 8px; margin: 15px 0; }
+        .avatar-option { width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+        .avatar-option.selected { border-color: #00a884; }
+
+        /* CHAT */
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
         .msg-wrapper { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; width: 100%; }
-        .msg-avatar { width: 35px; height: 35px; border-radius: 50%; background: #333; }
-        .msg-content { padding: 8px 12px; border-radius: 12px; max-width: 75%; position: relative; }
-        .msg-author { font-size: 0.75em; font-weight: bold; margin-bottom: 2px; }
+        .msg-content { padding: 8px 12px; border-radius: 10px; max-width: 75%; }
+        .msg-avatar { width: 30px; height: 30px; border-radius: 50%; }
 
-        /* Lado do Outro (Esquerda) */
         .outra-msg { flex-direction: row; }
-        .outra-msg .msg-content { background: #202c33; border-top-left-radius: 0; }
-        .outra-msg .msg-author { color: #8696a0; }
-
-        /* Meu Lado (Direita) */
+        .outra-msg .msg-content { background: #202c33; }
         .minha-msg { flex-direction: row-reverse; }
-        .minha-msg .msg-content { background: #005c4b; border-top-right-radius: 0; }
-        .minha-msg .msg-author { color: #0df09d; }
+        .minha-msg .msg-content { background: #005c4b; }
 
-        #form { display: flex; padding: 10px; background: #202c33; gap: 10px; }
-        #input { flex: 1; padding: 12px; border-radius: 25px; border: none; background: #2a3942; color: white; outline: none; }
+        #form { display: flex; padding: 10px; background: #202c33; gap: 8px; }
+        #input { flex: 1; border-radius: 20px; padding: 10px 15px; }
     </style>
 </head>
 <body>
 
     <div id="login-container">
         <div class="login-box">
-            <h2>Chat Vivido</h2>
-            <input type="text" id="username" placeholder="Seu apelido...">
-            <div class="avatar-list">
+            <h3>Criar Conta</h3>
+            <input type="text" id="nome" placeholder="Nome">
+            <input type="email" id="email" placeholder="E-mail">
+            <input type="text" id="user" placeholder="Usuário">
+            <input type="password" id="pass" placeholder="Senha">
+            <div class="avatar-list" id="avatares">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="avatar-option selected" data-avatar="Felix">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" class="avatar-option" data-avatar="Aneka">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jack" class="avatar-option" data-avatar="Jack">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Luna" class="avatar-option" data-avatar="Luna">
             </div>
-            <button onclick="entrar()">Entrar no Chat</button>
+            <button onclick="registrar()">Registrar e Entrar</button>
         </div>
     </div>
 
@@ -65,34 +57,58 @@
         <div id="messages"></div>
         <form id="form">
             <input id="input" autocomplete="off" placeholder="Mensagem" />
-            <button type="submit" style="width: auto; border-radius: 50%; width: 45px; height: 45px;">></button>
+            <button type="submit" style="width: auto; padding: 0 15px;">></button>
         </form>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let avatarSelecionado = "Felix";
-        let meuId = "";
+        let avatarSel = "Felix";
 
-        // Seleção de Avatar
+        // Gerenciar Avatares
         document.querySelectorAll('.avatar-option').forEach(img => {
             img.onclick = function() {
                 document.querySelector('.selected').classList.remove('selected');
                 this.classList.add('selected');
-                avatarSelecionado = this.getAttribute('data-avatar');
-            };
+                avatarSel = this.getAttribute('data-avatar');
+            }
         });
 
-        window.entrar = function() {
-            const nome = document.getElementById('username').value;
-            if(nome.trim()) {
-                meuId = socket.id;
-                socket.emit('novo-usuario', { nome, avatar: avatarSelecionado });
-                document.getElementById('login-container').style.display = 'none';
+        // AUTO-LOGIN
+        window.onload = () => {
+            const salvo = localStorage.getItem('vivido_login');
+            if (salvo) {
+                const user = JSON.parse(salvo);
+                socket.emit('entrar-chat', user);
                 document.getElementById('chat-container').style.display = 'flex';
+            } else {
+                document.getElementById('login-container').style.display = 'flex';
             }
         };
+
+        async function registrar() {
+            const user = {
+                nome: document.getElementById('nome').value,
+                email: document.getElementById('email').value,
+                username: document.getElementById('user').value,
+                pass: document.getElementById('pass').value,
+                avatar: avatarSel
+            };
+
+            const res = await fetch('/registrar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(user)
+            });
+
+            if (res.ok) {
+                localStorage.setItem('vivido_login', JSON.stringify(user));
+                location.reload();
+            } else {
+                alert("Usuário já existe ou erro no servidor.");
+            }
+        }
 
         const form = document.getElementById('form');
         const input = document.getElementById('input');
@@ -100,33 +116,20 @@
 
         function renderMsg(data) {
             const item = document.createElement('div');
-            // Se o ID da mensagem for igual ao meu ID atual, vai pra direita
             const eMinha = data.id === socket.id;
             item.className = `msg-wrapper ${eMinha ? 'minha-msg' : 'outra-msg'}`;
-            
-            item.innerHTML = `
-                <img class="msg-avatar" src="${data.avatar}">
-                <div class="msg-content">
-                    <div class="msg-author">${eMinha ? 'Você' : data.usuario}</div>
-                    <div>${data.texto}</div>
-                </div>
-            `;
+            item.innerHTML = `<img class="msg-avatar" src="${data.avatar}"><div class="msg-content"><small>${data.usuario}</small><div>${data.texto}</div></div>`;
             messages.appendChild(item);
             messages.scrollTop = messages.scrollHeight;
         }
 
         form.onsubmit = (e) => {
             e.preventDefault();
-            if (input.value) {
-                socket.emit('chat message', input.value);
-                input.value = '';
-            }
+            if (input.value) { socket.emit('chat message', input.value); input.value = ''; }
         };
 
         socket.on('chat message', (data) => renderMsg(data));
-        socket.on('historico', (lista) => {
-            lista.forEach(msg => renderMsg(msg));
-        });
+        socket.on('historico', (lista) => lista.forEach(msg => renderMsg(msg)));
     </script>
 </body>
 </html>
