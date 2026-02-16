@@ -23,7 +23,7 @@
         /* HEADER ESTILO APP */
         .chat-header {
             background: white;
-            padding: 15px 20px;
+            padding: 10px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -32,7 +32,17 @@
         }
         .header-info { display: flex; align-items: center; gap: 12px; }
         .app-logo { width: 45px; height: 45px; border-radius: 50%; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
-        .status-online { font-size: 0.8rem; color: #888; }
+        
+        #room-selector {
+            border: 1px solid #eee;
+            padding: 5px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            outline: none;
+            background: #f8f9fa;
+        }
+
+        #typing-monitor { font-size: 0.7rem; color: #00a884; font-weight: bold; height: 12px; }
 
         /* MENSAGENS */
         #messages { 
@@ -46,7 +56,6 @@
 
         .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; position: relative; }
         
-        /* MINHA MENSAGEM (GRADIENT) */
         .minha-msg { align-self: flex-end; }
         .minha-msg .msg-content { 
             background: var(--gradient-me); 
@@ -56,7 +65,6 @@
             box-shadow: 0 4px 15px rgba(66, 230, 149, 0.3);
         }
 
-        /* OUTRA MENSAGEM (GLASS) */
         .outra-msg { align-self: flex-start; }
         .outra-msg .msg-content { 
             background: var(--glass-bg); 
@@ -88,7 +96,6 @@
             outline: none; 
             font-size: 0.95rem; 
         }
-        #input::placeholder { color: #888; }
         
         .send-btn { 
             background: #42e695; 
@@ -101,7 +108,6 @@
             display: flex; 
             align-items: center; 
             justify-content: center;
-            font-size: 1.2rem;
         }
 
         /* LOGIN */
@@ -117,7 +123,7 @@
 
     <div id="login-container">
         <div class="login-box">
-            <h2 style="margin-bottom: 20px;">Bem-vindo</h2>
+            <h2 style="margin-bottom: 20px;">Chat Vivido Pro</h2>
             <input type="text" id="nome" placeholder="Seu Nome">
             <input type="text" id="user" placeholder="Usuário único">
             <input type="password" id="pass" placeholder="Senha">
@@ -129,18 +135,22 @@
         <div class="header-info">
             <div class="app-logo">⚡</div>
             <div>
-                <p style="font-weight: bold; color: #333;">Chat Vivido Pro</p>
-                <p class="status-online">● Online</p>
+                <select id="room-selector" onchange="mudarSala()">
+                    <option value="Geral">🌍 Geral</option>
+                    <option value="Games">🎮 Games</option>
+                    <option value="VIP">🔒 VIP</option>
+                </select>
+                <p id="typing-monitor"></p>
             </div>
         </div>
-        <button onclick="sair()" style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">☰</button>
+        <button onclick="sair()" style="background: none; border: none; color: #888; font-size: 1rem; cursor: pointer;">Sair</button>
     </div>
 
     <div id="messages"></div>
 
     <div id="footer" style="display:none;">
         <form id="form">
-            <input id="input" autocomplete="off" placeholder="Type a message..." />
+            <input id="input" autocomplete="off" placeholder="Escreva algo..." />
             <button type="submit" class="send-btn">➤</button>
         </form>
     </div>
@@ -148,24 +158,26 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let meuUsuarioLogado = "";
+        let meuUser = null;
+        let typingTimeout;
 
         window.onload = () => {
             const salvo = localStorage.getItem('vivido_login');
             if (salvo) {
-                const user = JSON.parse(salvo);
-                meuUsuarioLogado = user.username;
-                socket.emit('entrar-chat', user);
-                mostrarChat();
+                meuUser = JSON.parse(salvo);
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('header').style.display = 'flex';
+                document.getElementById('footer').style.display = 'block';
+                mudarSala(); 
             } else {
                 document.getElementById('login-container').style.display = 'flex';
             }
         };
 
-        function mostrarChat() {
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('header').style.display = 'flex';
-            document.getElementById('footer').style.display = 'block';
+        function mudarSala() {
+            const sala = document.getElementById('room-selector').value;
+            document.getElementById('messages').innerHTML = ''; 
+            socket.emit('join-room', { sala: sala, user: meuUser });
         }
 
         async function registrar() {
@@ -175,7 +187,7 @@
                 pass: document.getElementById('pass').value,
                 avatar: "Felix" 
             };
-            if(!user.username) return alert("Preencha o usuário!");
+            if(!user.username || !user.nome) return alert("Preencha os campos!");
             
             const res = await fetch('/registrar', {
                 method: 'POST',
@@ -186,13 +198,25 @@
             if (res.ok) {
                 localStorage.setItem('vivido_login', JSON.stringify(user));
                 location.reload();
-            } else { alert("Erro ou usuário já existe."); }
+            } else { alert("Usuário já existe."); }
         }
 
         function sair() { localStorage.removeItem('vivido_login'); location.reload(); }
 
+        // Sistema de "Digitando"
+        document.getElementById('input').addEventListener('input', () => {
+            socket.emit('typing', true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => socket.emit('typing', false), 2000);
+        });
+
+        socket.on('user-typing', (data) => {
+            const monitor = document.getElementById('typing-monitor');
+            monitor.innerText = data.typing ? `${data.username} está digitando...` : '';
+        });
+
         function renderMsg(data) {
-            const eMinha = data.usuarioLogado === meuUsuarioLogado;
+            const eMinha = data.usuarioLogado === meuUser.username;
             const item = document.createElement('div');
             item.className = `msg-wrapper ${eMinha ? 'minha-msg' : 'outra-msg'}`;
             
@@ -200,12 +224,13 @@
                 ${!eMinha ? `<span class="msg-info">${data.exibirNome}</span>` : ''}
                 <div class="msg-content">
                     <div>${data.texto}</div>
-                    <span class="msg-time">${data.hora || '14:30'} ${eMinha ? '✓' : ''}</span>
+                    <span class="msg-time">${data.hora} ${eMinha ? '✓' : ''}</span>
                 </div>
             `;
             
-            document.getElementById('messages').appendChild(item);
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            const box = document.getElementById('messages');
+            box.appendChild(item);
+            box.scrollTop = box.scrollHeight;
             if (!eMinha) document.getElementById('som-notificacao').play().catch(() => {});
         }
 

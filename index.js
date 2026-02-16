@@ -26,12 +26,27 @@ app.post('/registrar', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    socket.emit('historico', JSON.parse(fs.readFileSync(MSGS_FILE, 'utf8')));
+    // Entrar em uma sala específica
+    socket.on('join-room', (dados) => {
+        socket.leave(socket.currentRoom); // Sai da sala antiga
+        socket.join(dados.sala);
+        socket.currentRoom = dados.sala;
+        socket.username = dados.user.nome;
+        socket.userUnico = dados.user.username;
+        socket.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${dados.user.avatar}`;
 
-    socket.on('entrar-chat', (user) => {
-        socket.nomeReal = user.nome;
-        socket.userNameUnico = user.username;
-        socket.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`;
+        // Envia histórico apenas daquela sala
+        const todasMsgs = JSON.parse(fs.readFileSync(MSGS_FILE, 'utf8'));
+        const msgsSala = todasMsgs.filter(m => m.sala === dados.sala);
+        socket.emit('historico', msgsSala);
+    });
+
+    // Detectar digitação
+    socket.on('typing', (status) => {
+        socket.to(socket.currentRoom).emit('user-typing', {
+            username: socket.username,
+            typing: status
+        });
     });
 
     socket.on('chat message', (msg) => {
@@ -39,20 +54,19 @@ io.on('connection', (socket) => {
         const horaFormatada = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
 
         const objetoMsg = {
-            usuarioLogado: socket.userNameUnico,
-            exibirNome: socket.nomeReal,
+            sala: socket.currentRoom,
+            usuarioLogado: socket.userUnico,
+            exibirNome: socket.username,
             texto: msg,
-            avatar: socket.avatar,
             hora: horaFormatada
         };
         
         let msgs = JSON.parse(fs.readFileSync(MSGS_FILE, 'utf8'));
         msgs.push(objetoMsg);
-        fs.writeFileSync(MSGS_FILE, JSON.stringify(msgs.slice(-50), null, 2));
+        fs.writeFileSync(MSGS_FILE, JSON.stringify(msgs.slice(-100), null, 2));
         
-        io.emit('chat message', objetoMsg);
+        io.to(socket.currentRoom).emit('chat message', objetoMsg);
     });
 });
 
-const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => console.log('Servidor ON na porta ' + PORT));
+http.listen(process.env.PORT || 3000, () => console.log('Servidor ON'));
