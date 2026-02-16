@@ -9,112 +9,48 @@
             --gradient-me: linear-gradient(135deg, #42e695 0%, #3bb2b8 100%);
             --gradient-bg: linear-gradient(180deg, #a1c4fd 0%, #c2e9fb 100%);
             --glass-bg: rgba(255, 255, 255, 0.9);
+            --accent: #00a884;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
-        body { 
-            background: var(--gradient-bg); 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-        }
+        body { background: var(--gradient-bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* HEADER ESTILO APP */
-        .chat-header {
-            background: white;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            z-index: 10;
-        }
+        /* TELA DE REGISTRO ESTILO WHATSAPP */
+        #login-container { position: fixed; inset: 0; background: #fff; display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .login-box { width: 100%; max-width: 350px; text-align: center; }
+        .profile-pic-container { position: relative; width: 110px; height: 110px; margin: 0 auto 20px; }
+        #preview-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); background: #eee; }
+        .upload-btn { position: absolute; bottom: 0; right: 0; background: var(--accent); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid white; font-size: 14px; }
+        
+        .login-box input { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 12px; border: 1px solid #ddd; background: #f9f9f9; outline: none; }
+        .login-box button { width: 100%; padding: 14px; border-radius: 12px; background: #333; color: white; border: none; font-weight: bold; cursor: pointer; }
+
+        /* HEADER */
+        .chat-header { background: white; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 10; }
         .header-info { display: flex; align-items: center; gap: 12px; }
-        .app-logo { width: 45px; height: 45px; border-radius: 50%; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
-        
-        #room-selector {
-            border: 1px solid #eee;
-            padding: 5px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            outline: none;
-            background: #f8f9fa;
-        }
-
-        #typing-monitor { font-size: 0.7rem; color: #00a884; font-weight: bold; height: 12px; }
+        #room-selector { border: 1px solid #eee; padding: 5px; border-radius: 8px; font-size: 0.8rem; background: #f8f9fa; outline: none; }
+        #typing-monitor { font-size: 0.7rem; color: var(--accent); font-weight: bold; height: 12px; }
 
         /* MENSAGENS */
-        #messages { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px;
-        }
-
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; position: relative; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .msg-wrapper { display: flex; align-items: flex-start; gap: 8px; max-width: 85%; }
+        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 15px; }
         
-        .minha-msg { align-self: flex-end; }
-        .minha-msg .msg-content { 
-            background: var(--gradient-me); 
-            color: white; 
-            border-radius: 20px 20px 0 20px; 
-            padding: 12px 18px;
-            box-shadow: 0 4px 15px rgba(66, 230, 149, 0.3);
-        }
+        .minha-msg { align-self: flex-end; flex-direction: row-reverse; }
+        .minha-msg .msg-content { background: var(--gradient-me); color: white; border-radius: 18px 18px 0 18px; padding: 10px 15px; box-shadow: 0 4px 12px rgba(66, 230, 149, 0.2); }
+        .minha-msg .msg-avatar { display: none; }
 
         .outra-msg { align-self: flex-start; }
-        .outra-msg .msg-content { 
-            background: var(--glass-bg); 
-            color: #333; 
-            border-radius: 20px 20px 20px 0; 
-            padding: 12px 18px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
+        .outra-msg .msg-content { background: var(--glass-bg); color: #333; border-radius: 18px 18px 18px 0; padding: 10px 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-        .msg-info { font-size: 0.7rem; margin-bottom: 4px; color: #666; font-weight: bold; }
-        .msg-time { font-size: 0.65rem; margin-top: 5px; display: block; text-align: right; opacity: 0.8; }
+        .msg-info { font-size: 0.7rem; margin-bottom: 2px; color: #666; font-weight: bold; }
+        .msg-time { font-size: 0.6rem; margin-top: 4px; display: block; text-align: right; opacity: 0.7; }
 
-        /* INPUT FLUTUANTE DARK */
-        #footer { padding: 20px; }
-        #form { 
-            background: #333; 
-            border-radius: 30px; 
-            padding: 8px 10px 8px 20px; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        #input { 
-            flex: 1; 
-            background: transparent; 
-            border: none; 
-            color: white; 
-            outline: none; 
-            font-size: 0.95rem; 
-        }
-        
-        .send-btn { 
-            background: #42e695; 
-            border: none; 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            color: white; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-        }
-
-        /* LOGIN */
-        #login-container { position: fixed; inset: 0; background: white; display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .login-box { width: 100%; max-width: 350px; text-align: center; }
-        .login-box input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #eee; background: #f9f9f9; }
-        .login-box button { width: 100%; padding: 15px; border-radius: 10px; background: #333; color: white; border: none; font-weight: bold; }
+        /* FOOTER */
+        #footer { padding: 15px 20px; }
+        #form { background: #333; border-radius: 30px; padding: 6px 10px 6px 20px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        #input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 0.95rem; }
+        .send-btn { background: var(--accent); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; cursor: pointer; font-size: 1.1rem; }
     </style>
 </head>
 <body>
@@ -123,34 +59,43 @@
 
     <div id="login-container">
         <div class="login-box">
-            <h2 style="margin-bottom: 20px;">Chat Vivido Pro</h2>
+            <h2 style="margin-bottom: 5px;">Criar Perfil</h2>
+            <p style="color:#888; font-size:0.85rem; margin-bottom:20px;">Escolha uma foto da sua galeria</p>
+            
+            <div class="profile-pic-container">
+                <img id="preview-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=custom">
+                <label for="file-input" class="upload-btn">📷</label>
+                <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="carregarFoto(event)">
+            </div>
+
             <input type="text" id="nome" placeholder="Seu Nome">
-            <input type="text" id="user" placeholder="Usuário único">
+            <input type="email" id="email" placeholder="E-mail">
+            <input type="text" id="user" placeholder="Nome de usuário único">
             <input type="password" id="pass" placeholder="Senha">
-            <button onclick="registrar()">Entrar</button>
+            <button onclick="registrar()">Começar Agora</button>
         </div>
     </div>
 
     <div class="chat-header" id="header" style="display:none;">
         <div class="header-info">
-            <div class="app-logo">⚡</div>
+            <div style="font-weight: bold; color: #333; font-size: 1.1rem;">⚡ Vivido</div>
             <div>
                 <select id="room-selector" onchange="mudarSala()">
                     <option value="Geral">🌍 Geral</option>
                     <option value="Games">🎮 Games</option>
-                    <option value="VIP">🔒 VIP</option>
+                    <option value="Privado">🔒 Privado</option>
                 </select>
                 <p id="typing-monitor"></p>
             </div>
         </div>
-        <button onclick="sair()" style="background: none; border: none; color: #888; font-size: 1rem; cursor: pointer;">Sair</button>
+        <button onclick="sair()" style="background:none; border:none; color:#999; font-size:0.9rem;">Sair</button>
     </div>
 
     <div id="messages"></div>
 
     <div id="footer" style="display:none;">
         <form id="form">
-            <input id="input" autocomplete="off" placeholder="Escreva algo..." />
+            <input id="input" autocomplete="off" placeholder="Digite uma mensagem..." />
             <button type="submit" class="send-btn">➤</button>
         </form>
     </div>
@@ -160,6 +105,27 @@
         const socket = io();
         let meuUser = null;
         let typingTimeout;
+        let fotoBase64 = "https://api.dicebear.com/7.x/avataaars/svg?seed=custom";
+
+        function carregarFoto(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function() {
+                const img = new Image();
+                img.src = reader.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const max = 150; 
+                    const scale = max / Math.max(img.width, img.height);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    fotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    document.getElementById('preview-avatar').src = fotoBase64;
+                }
+            }
+            if(file) reader.readAsDataURL(file);
+        }
 
         window.onload = () => {
             const salvo = localStorage.getItem('vivido_login');
@@ -177,15 +143,16 @@
         function mudarSala() {
             const sala = document.getElementById('room-selector').value;
             document.getElementById('messages').innerHTML = ''; 
-            socket.emit('join-room', { sala: sala, user: meuUser });
+            socket.emit('join-room', { sala, user: meuUser });
         }
 
         async function registrar() {
             const user = {
                 nome: document.getElementById('nome').value,
+                email: document.getElementById('email').value,
                 username: document.getElementById('user').value,
                 pass: document.getElementById('pass').value,
-                avatar: "Felix" 
+                avatar: fotoBase64
             };
             if(!user.username || !user.nome) return alert("Preencha os campos!");
             
@@ -203,7 +170,6 @@
 
         function sair() { localStorage.removeItem('vivido_login'); location.reload(); }
 
-        // Sistema de "Digitando"
         document.getElementById('input').addEventListener('input', () => {
             socket.emit('typing', true);
             clearTimeout(typingTimeout);
@@ -211,8 +177,7 @@
         });
 
         socket.on('user-typing', (data) => {
-            const monitor = document.getElementById('typing-monitor');
-            monitor.innerText = data.typing ? `${data.username} está digitando...` : '';
+            document.getElementById('typing-monitor').innerText = data.typing ? `${data.username} está digitando...` : '';
         });
 
         function renderMsg(data) {
@@ -221,9 +186,10 @@
             item.className = `msg-wrapper ${eMinha ? 'minha-msg' : 'outra-msg'}`;
             
             item.innerHTML = `
-                ${!eMinha ? `<span class="msg-info">${data.exibirNome}</span>` : ''}
+                <img class="msg-avatar" src="${data.avatar}">
                 <div class="msg-content">
-                    <div>${data.texto}</div>
+                    ${!eMinha ? `<span class="msg-info">${data.exibirNome}</span>` : ''}
+                    <div style="word-break: break-word;">${data.texto}</div>
                     <span class="msg-time">${data.hora} ${eMinha ? '✓' : ''}</span>
                 </div>
             `;
